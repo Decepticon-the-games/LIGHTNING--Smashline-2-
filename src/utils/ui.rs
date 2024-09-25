@@ -1,4 +1,5 @@
-use super::*;
+use once_cell::sync::Lazy;
+use parking_lot::RwLock;
 
 const BACKGROUND_GREEN: [f32; 4] = [0.0, 1.0, 0.0, 1.0];
 const BACKGROUND_PURPLE: [f32; 4] = [1.0, 0.0, 1.0, 1.0];
@@ -287,11 +288,10 @@ pub struct UiManager {
 
 impl UiManager {
     fn get_ui_index_from_entry_id(entry_id: u32) -> u32 {
-        use crate::utils::utils::get_battle_object_from_entry_id;
 
         let mut index = 0;
         for n in 0..entry_id {
-            if get_battle_object_from_entry_id(n).is_some() {
+            if crate::dynamics::util::get_battle_object_from_entry_id(n).is_some() {
                 index += 1;
             }
         }
@@ -323,6 +323,7 @@ impl UiManager {
         manager.palutena_meter[Self::get_ui_index_from_entry_id(entry_id) as usize].change_color_purple();
     }
 }
+
 
 static UI_MANAGER: Lazy<RwLock<UiManager>> = Lazy::new(||{RwLock::new(UiManager {palutena_meter: [PalutenaMeter::default(); 8]})});
 

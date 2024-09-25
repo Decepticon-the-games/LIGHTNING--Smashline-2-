@@ -19,9 +19,8 @@ pub static mut LIGHTNING_EFFECTS: [bool; 8] = [false; 8];
 pub static mut ONEFRAMEEFFECTS: [bool; 8] = [false; 8];
 
 unsafe extern "C" fn lightning_opff(fighter : &mut L2CFighterCommon) {
-    unsafe {
+
         let entry_id = WorkModule::get_int(fighter.module_accessor, *FIGHTER_INSTANCE_WORK_ID_INT_ENTRY_ID) as usize;
-        let entry_id_u32 = WorkModule::get_int(fighter.module_accessor, *FIGHTER_INSTANCE_WORK_ID_INT_ENTRY_ID) as u32;
         let cat2 = ControlModule::get_command_flag_cat(fighter.module_accessor, 1);
         let hitlag = (SlowModule::frame(fighter.module_accessor, *FIGHTER_SLOW_KIND_HIT) > 0 || StopModule::is_stop(fighter.module_accessor));
         let status_kind = StatusModule::status_kind(fighter.module_accessor);
@@ -32,7 +31,6 @@ unsafe extern "C" fn lightning_opff(fighter : &mut L2CFighterCommon) {
             //println!("lt: {}", WorkModule::get_int(fighter.module_accessor, FIGHTER_INSTANCE_WORK_ID_INT_LIGHTNING_TIMER) );
         }
         
-        UiManager::set_palutena_meter_enable(entry_id_u32, true);
         if lightning_mode_conditions(fighter) {
             WorkModule::enable_transition_term(fighter.module_accessor, FIGHTER_STATUS_TRANSITION_TERM_ID_CONT_LIGHTNING)
         }
@@ -57,7 +55,7 @@ unsafe extern "C" fn lightning_opff(fighter : &mut L2CFighterCommon) {
                 lightning_disable(fighter);
             }   
         }
-    }
+
 }
 unsafe extern "C" fn lightning_mode_conditions(fighter : &mut L2CFighterCommon) -> bool {
     unsafe {
