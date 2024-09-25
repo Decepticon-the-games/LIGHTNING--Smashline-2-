@@ -35,10 +35,13 @@ pub unsafe extern "C" fn whiff_cancel(fighter : &mut L2CAgentBase) {//This funct
 }
 unsafe extern "C" fn deadfall_whiff_cancel(fighter : &mut L2CFighterCommon) {
     let entry_id = WorkModule::get_int(fighter.module_accessor, *FIGHTER_INSTANCE_WORK_ID_INT_ENTRY_ID) as usize;
+    if entry_id < 1 {
+        //println!("deadfall: {}", WorkModule::get_int(fighter.module_accessor, DEADFALL));
+    }
 
     if WorkModule::get_int(fighter.module_accessor, DEADFALL) != 0 {
         if StatusModule::situation_kind(fighter.module_accessor) != *SITUATION_KIND_AIR 
-        || StopModule::is_hit(fighter.module_accessor)
+        || StopModule::is_damage(fighter.module_accessor)
         || CaptureModule::is_capture(fighter.module_accessor) {
 
             WorkModule::set_int(fighter.module_accessor, 0, DEADFALL);

@@ -31,8 +31,8 @@ unsafe extern "C" fn wavedash_landing(fighter : &mut L2CFighterCommon) {
     let entry_id = WorkModule::get_int(fighter.module_accessor, *FIGHTER_INSTANCE_WORK_ID_INT_ENTRY_ID) as usize;
     
     if entry_id < 1 {
-        println!("wavedash: {}", WorkModule::is_flag(fighter.module_accessor, WAVEDASH));
-        println!("magnet: {}", WorkModule::is_flag(fighter.module_accessor, WAVEDASH_MAGNET));
+        //println!("wavedash: {}", WorkModule::is_flag(fighter.module_accessor, WAVEDASH));
+        //println!("magnet: {}", WorkModule::is_flag(fighter.module_accessor, WAVEDASH_MAGNET));
     } 
     if WorkModule::is_flag(fighter.module_accessor, WAVEDASH)  {
 

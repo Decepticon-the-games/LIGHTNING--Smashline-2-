@@ -1,3 +1,4 @@
+use crate::utils::ui::UiManager;
 use super::*;
 use skyline::nn::ro::LookupSymbol;
 use smash::app::{self, lua_bind::{FighterManager, FighterInformation, *}, sv_animcmd::*, *};
@@ -17,11 +18,10 @@ pub static mut LIGHTNING_BUTTON : [bool; 8] = [false; 8];
 pub static mut LIGHTNING_EFFECTS: [bool; 8] = [false; 8];
 pub static mut ONEFRAMEEFFECTS: [bool; 8] = [false; 8];
 
-
-
 unsafe extern "C" fn lightning_opff(fighter : &mut L2CFighterCommon) {
     unsafe {
         let entry_id = WorkModule::get_int(fighter.module_accessor, *FIGHTER_INSTANCE_WORK_ID_INT_ENTRY_ID) as usize;
+        let entry_id_u32 = WorkModule::get_int(fighter.module_accessor, *FIGHTER_INSTANCE_WORK_ID_INT_ENTRY_ID) as u32;
         let cat2 = ControlModule::get_command_flag_cat(fighter.module_accessor, 1);
         let hitlag = (SlowModule::frame(fighter.module_accessor, *FIGHTER_SLOW_KIND_HIT) > 0 || StopModule::is_stop(fighter.module_accessor));
         let status_kind = StatusModule::status_kind(fighter.module_accessor);
@@ -32,6 +32,7 @@ unsafe extern "C" fn lightning_opff(fighter : &mut L2CFighterCommon) {
             //println!("lt: {}", WorkModule::get_int(fighter.module_accessor, FIGHTER_INSTANCE_WORK_ID_INT_LIGHTNING_TIMER) );
         }
         
+        UiManager::set_palutena_meter_enable(entry_id_u32, true);
         if lightning_mode_conditions(fighter) {
             WorkModule::enable_transition_term(fighter.module_accessor, FIGHTER_STATUS_TRANSITION_TERM_ID_CONT_LIGHTNING)
         }
@@ -159,11 +160,11 @@ unsafe extern "C" fn status_lightning_end(fighter: &mut L2CFighterCommon) -> L2C
 
 //VISUAL EFFECTS
 unsafe extern "C" fn lightning_effects(fighter : &mut L2CFighterCommon) {
-    let status_kind = StatusModule::status_kind(fighter.module_accessor);
-    let entry_id = WorkModule::get_int(fighter.module_accessor, *FIGHTER_INSTANCE_WORK_ID_INT_ENTRY_ID) as usize;
+
+    let entry_id = WorkModule::get_int(fighter.module_accessor, *FIGHTER_INSTANCE_WORK_ID_INT_ENTRY_ID) as u32;
     let vector = Vector3f{x:0.0,y:10.0,z:0.0};
     let effect = EffectModule::req_follow(fighter.module_accessor, Hash40::new("sys_aura_light"), (Hash40::new("top")), &vector, &vector, 3.0, true, 0, 0, 0, 0, 0, true, true) as u32;
-    
+
     //macros::LAST_EFFECT_SET_COLOR(fighter,0.0, 0.784, 1.0,);
     EffectModule::set_rgb(fighter.module_accessor, EffectModule::req_emit(fighter.module_accessor, Hash40::new("sys_aura_light"), 0) as u32, 0.0, 0.784, 1.0);
     EffectModule::set_rgb(fighter.module_accessor, EffectModule::req_emit(fighter.module_accessor, Hash40::new("sys_aura_light"), 0) as u32, 0.0, 0.784, 1.0);
@@ -172,8 +173,10 @@ unsafe extern "C" fn lightning_effects(fighter : &mut L2CFighterCommon) {
 }
 //DISABLE
 unsafe extern "C" fn lightning_disable(fighter : &mut L2CFighterCommon) {
-    let entry_id = WorkModule::get_int(fighter.module_accessor, *FIGHTER_INSTANCE_WORK_ID_INT_ENTRY_ID) as usize;
-
+    let entry_id = WorkModule::get_int(fighter.module_accessor, *FIGHTER_INSTANCE_WORK_ID_INT_ENTRY_ID) as u32;
+    
+   
+    
     macros::BURN_COLOR_NORMAL(fighter);
     macros::COL_NORMAL(fighter);
     macros::EFFECT_OFF_KIND(fighter, Hash40::new("sys_final_aura"), true, true);

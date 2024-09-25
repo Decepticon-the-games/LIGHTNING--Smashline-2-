@@ -22,7 +22,7 @@ use {
         }
     },
     smash_script::*,
-    smashline::*
+    smashline::*,
 };
 use crate::fighters::{
     common::{
@@ -39,13 +39,13 @@ use crate::fighters::{
             lightning_mechanics::{
                 lightning_mode::{FIGHTER_INSTANCE_WORK_ID_FLAG_LIGHTNING}
             }
-        },
+        }
     }
 };
 
-
-pub mod common;
 /*
+pub mod common;
+
 pub mod mario;
 pub mod donkey;
 pub mod link;
@@ -116,7 +116,7 @@ pub mod ken;
 pub mod cloud;
 pub mod kamui;
 pub mod bayonetta;
-*/
+
 pub mod inkling;
 pub mod ridley;
 pub mod simon;
@@ -141,13 +141,13 @@ pub mod trail;
 pub mod miifighter;
 pub mod miiswordsman;
 pub mod miigunner;
+*/
 
-
-
+/*
 pub fn install() {
 
 common::install();
-/*
+
 mario::install();
 donkey::install();
 link::install();
@@ -218,7 +218,7 @@ ken::install();
 cloud::install();
 kamui::install();
 bayonetta::install();
-*/
+
 inkling::install();
 ridley::install();
 simon::install();
@@ -245,17 +245,40 @@ miiswordsman::install();
 miigunner::install();
 
 }
-
+*/
 
 //teseting//
-/*
+
 pub mod common;
-pub mod bayonetta;
-pub mod mario;
+
+//pub mod mario;
+//pub mod donkey;
+//pub mod link;
+//pub mod samus;
+//pub mod samusd;
+//pub mod yoshi;
+//pub mod kirby;
+//pub mod fox;
+//pub mod pikachu;
+//pub mod luigi;
+//pub mod ness;
+pub mod captain;
+//pub mod purin;
 
 pub fn install(){
     common::install();  
-    bayonetta::install();
-    mario::install();
+
+    //mario::install();
+    //donkey::install();
+    //link::install();
+    //samus::install();
+    //samusd::install();
+    //yoshi::install();
+    //kirby::install();
+    //fox::install();
+    //pikachu::install();
+    //luigi::install();
+    //ness::install();
+    captain::install();
+    //purin::install();
 }
-*/

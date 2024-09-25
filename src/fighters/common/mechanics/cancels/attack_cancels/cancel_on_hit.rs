@@ -4,7 +4,7 @@ use crate::fighters::common::mechanics::{cancels::motioncancels::cancel_in_neutr
 pub const ATTACK_CANCEL: i32 = 0x106;
 pub const ENABLE_ATTACK_CANCEL: i32 = 0x107;
 pub const ENABLE_MULTIHIT_CANCEL: i32 = 0x0108;
-pub const MULTIHIT: i32 = 0x0109;
+pub const MULTIHIT_CANCEL: i32 = 0x0109;
 pub const MULTIHIT_COUNT : i32 = 0x010A;
 //These attack_cancel functions get the state your in (status_kind, flag, or motion_kind), your next button, the previous state you were in.
 
@@ -49,9 +49,14 @@ pub unsafe extern "C" fn attack_cancel(fighter : &mut L2CFighterCommon) {
         //Turn off once CANCEL_IN_NEUTRAL runs/Hitboxes are cleared
         else if WorkModule::is_flag(fighter.module_accessor, CANCEL_IN_NEUTRAL) { 
             WorkModule::off_flag(fighter.module_accessor, ENABLE_ATTACK_CANCEL);
-        }        
+        }       
+        
+        //Attack Cancel
         if WorkModule::is_flag(fighter.module_accessor, ATTACK_CANCEL) {
-            cancel_on_hit(fighter);  
+            cancel_on_hit(fighter);   
+            
+            //Extend buffer frames each frame of hitlag
+            ControlModule::set_command_life_extend(fighter.module_accessor, SlowModule::frame(fighter.module_accessor, *FIGHTER_SLOW_KIND_HIT) as u8); 
 
             //Turn on visible window in trainining mode
             /*if app::smashball::is_training_mode() {
@@ -70,7 +75,18 @@ pub unsafe extern "C" fn attack_cancel(fighter : &mut L2CFighterCommon) {
 
 //MULTIHIT_CANCELS (multihit attacks)
 pub unsafe extern "C" fn enable_multihit_cancel(fighter : &mut L2CAgentBase) {
-    WorkModule::on_flag(fighter.module_accessor, ENABLE_MULTIHIT_CANCEL);
+    let oboma = sv_battle_object::module_accessor((WorkModule::get_int(fighter.module_accessor, *WEAPON_INSTANCE_WORK_ID_INT_ACTIVATE_FOUNDER_ID)) as u32); // links weapon to whatever may ownn it  
+    let battle_object_category = utility::get_category(&mut *fighter.module_accessor);
+    
+    //Check for if the hitbox belongs to a fighter or weapon, then enable attack cancelling for the fighter.
+    if ! AttackModule::is_infliction(fighter.module_accessor, *COLLISION_KIND_MASK_ALL) {
+        if battle_object_category == *BATTLE_OBJECT_CATEGORY_FIGHTER {
+            WorkModule::on_flag(fighter.module_accessor, ENABLE_MULTIHIT_CANCEL);
+        }
+        if battle_object_category == *BATTLE_OBJECT_CATEGORY_WEAPON {
+           WorkModule::on_flag(oboma, ENABLE_MULTIHIT_CANCEL); 
+        }
+    }
 }
 //(canceling at a specific point in a multihit move)
 pub unsafe extern "C" fn multihit_cancel(
@@ -100,16 +116,35 @@ pub unsafe extern "C" fn multihit_cancel(
     );
 
     if WorkModule::is_flag(fighter.module_accessor, ENABLE_MULTIHIT_CANCEL) {
-        if is_condition {
-            if next_input {
-                cancel_on_hit(fighter);  
-                WorkModule::off_flag(fighter.module_accessor, ENABLE_MULTIHIT_CANCEL);                 
-            }   
-        }
-        else {
-            WorkModule::off_flag(fighter.module_accessor, ENABLE_MULTIHIT_CANCEL);
+        if AttackModule::is_infliction(fighter.module_accessor, *COLLISION_KIND_MASK_ALL) {
+            WorkModule::on_flag(fighter.module_accessor, MULTIHIT_CANCEL);   
+            WorkModule::off_flag(fighter.module_accessor, ENABLE_MULTIHIT_CANCEL);                 
         }
     }
+    if WorkModule::is_flag(fighter.module_accessor, MULTIHIT_CANCEL) {
+        if is_condition {
+            if next_input {
+                cancel_on_hit(fighter); 
+                //WorkModule::off_flag(fighter.module_accessor, MULTIHIT_CANCEL);                 
+            }   
+            //Extend buffer frames each frame of hitlag
+            ControlModule::set_command_life_extend(fighter.module_accessor, SlowModule::frame(fighter.module_accessor, *FIGHTER_SLOW_KIND_HIT) as u8); 
+        }
+        else if is_reset {
+            WorkModule::off_flag(fighter.module_accessor, MULTIHIT_CANCEL);
+        }
+    }
+    if WorkModule::is_flag(fighter.module_accessor, ENABLE_ATTACK_CANCEL)
+    || WorkModule::is_flag(fighter.module_accessor, ATTACK_CANCEL) {
+        WorkModule::off_flag(fighter.module_accessor, MULTIHIT_CANCEL);
+        WorkModule::off_flag(fighter.module_accessor, ENABLE_MULTIHIT_CANCEL);
+    }
+    
+
+    if entry_id < 1 {
+        println!("en_mul_cancel: {}", WorkModule::is_flag(fighter.module_accessor, ENABLE_MULTIHIT_CANCEL));
+        println!("mul_cancel: {}", WorkModule::is_flag(fighter.module_accessor, MULTIHIT_CANCEL));
+    } 
 }
 //(canceling after landing a ceertain amount of hits in a multihit move)
 pub unsafe extern "C" fn multihit_counter(
@@ -142,6 +177,7 @@ pub unsafe extern "C" fn multihit_counter(
     
 
     if WorkModule::is_flag(fighter.module_accessor, ENABLE_MULTIHIT_CANCEL) {
+
         //Multihit cancels after a certain amount of successful hits
         if is_condition {
             if AttackModule::is_infliction(fighter.module_accessor, *COLLISION_KIND_MASK_ALL) {
@@ -149,19 +185,34 @@ pub unsafe extern "C" fn multihit_counter(
             }
         
             if WorkModule::get_int(fighter.module_accessor, MULTIHIT_COUNT) == multihitcount { //how many hits
-                if next_input {
-                    cancel_on_hit(fighter);   
-                    WorkModule::set_int(fighter.module_accessor, 0, MULTIHIT_COUNT);
-                }
-            }
-            else {
+                WorkModule::on_flag(fighter.module_accessor, MULTIHIT_CANCEL);
                 WorkModule::off_flag(fighter.module_accessor, ENABLE_MULTIHIT_CANCEL);                 
             }
-        }  
+        }
+    }
+    if WorkModule::is_flag(fighter.module_accessor, MULTIHIT_CANCEL) {
+        if is_condition {
+                if next_input {
+                cancel_on_hit(fighter);   
+            }
+            //Extend buffer frames each frame of hitlag
+            ControlModule::set_command_life_extend(fighter.module_accessor, SlowModule::frame(fighter.module_accessor, *FIGHTER_SLOW_KIND_HIT) as u8); 
+
+        }
         else if is_reset {
             WorkModule::set_int(fighter.module_accessor, 0, MULTIHIT_COUNT);
-        }        
-    }        
+        }  
+    }  
+    if WorkModule::is_flag(fighter.module_accessor, ENABLE_ATTACK_CANCEL)
+    || WorkModule::is_flag(fighter.module_accessor, ATTACK_CANCEL) {
+        WorkModule::off_flag(fighter.module_accessor, MULTIHIT_CANCEL);
+        WorkModule::off_flag(fighter.module_accessor, ENABLE_MULTIHIT_CANCEL);
+    }
+
+    if entry_id < 1 {
+        //println!("en_mul_cancel: {}", WorkModule::is_flag(fighter.module_accessor, ENABLE_MULTIHIT_CANCEL));
+        //println!("mul_count: {}", WorkModule::get_int(fighter.module_accessor, MULTIHIT_COUNT));
+    } 
 }
 
 //Custom if after hitlag function, only true if is_attack_occur aside from hitlag.
@@ -184,7 +235,7 @@ unsafe extern "C" fn cancel_on_hit(fighter: &mut L2CAgentBase) {
     let situation_kind = StatusModule::situation_kind(fighter.module_accessor);
     let cat1 = ControlModule::get_command_flag_cat(fighter.module_accessor, 0);
     
-    if WorkModule::is_flag(fighter.module_accessor, ATTACK_CANCEL) {
+    //if WorkModule::is_flag(fighter.module_accessor, ATTACK_CANCEL) {
         if is_after_hitlag(fighter) {
             if (moveset_input(fighter) || whiff_input(fighter)) {
                 CancelModule::enable_cancel(fighter.module_accessor);    
@@ -193,11 +244,8 @@ unsafe extern "C" fn cancel_on_hit(fighter: &mut L2CAgentBase) {
                 WorkModule::off_flag(fighter.module_accessor, ATTACK_CANCEL);
             }         
         }
-        //Extend buffer frames each frame of hitlag
-        ControlModule::set_command_life_extend(fighter.module_accessor, SlowModule::frame(fighter.module_accessor, *FIGHTER_SLOW_KIND_HIT) as u8); 
-    }
+    //}
 }
-
 unsafe extern "C" fn cancel_on_hit_resets(fighter : &mut L2CFighterCommon) {
     WorkModule::off_flag(fighter.module_accessor, ENABLE_ATTACK_CANCEL);
     WorkModule::off_flag(fighter.module_accessor, ATTACK_CANCEL);

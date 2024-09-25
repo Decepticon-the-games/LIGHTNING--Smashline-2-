@@ -36,12 +36,19 @@ pub const FIGHTER_PAD_CMD_CAT1_FLAG_VANISH: i32 = 0x400000 +1;
 unsafe extern "C" fn vanish_opff(fighter : &mut L2CFighterCommon) {
     unsafe {
         let entry_id = WorkModule::get_int(fighter.module_accessor, *FIGHTER_INSTANCE_WORK_ID_INT_ENTRY_ID) as usize;
+        let opponent_boma = sv_battle_object::module_accessor(VA_WHO_GOT_HIT_BOMA[entry_id]);
         let cat1 = ControlModule::get_command_flag_cat(fighter.module_accessor, 0);
-        
+        let opponent_pos_x = PostureModule::pos_x(opponent_boma);
+        let opponent_pos_y = PostureModule::pos_y(opponent_boma);
+        let pos_x = PostureModule::pos_x(fighter.module_accessor);
+        let pos_y = PostureModule::pos_y(fighter.module_accessor);
+        //let pos_from_you = ((pos_x * opponent_pos_x) + (pos_y * opponent_pos_y)).sqrt();
+
         if entry_id < 1 {
             //println!("va_x: {}", VA_OPPONENT_X[entry_id]);
             //println!("va_y: {}", VA_OPPONENT_Y[entry_id]);
-            //println!("vt: {}", VANISH_TIMER[entry_id] );
+            //
+            //println!("pos_from_you: {}", pos_from_you );
         }  
               
         if vanish_condition(fighter) {
@@ -66,13 +73,21 @@ unsafe extern "C" fn vanish_condition(fighter : &mut L2CFighterCommon) -> bool {
     let speed_x = KineticModule::get_sum_speed_x(opponent_boma, *KINETIC_ENERGY_RESERVE_ATTRIBUTE_DAMAGE);
     let speed_y = KineticModule::get_sum_speed_y(opponent_boma, *KINETIC_ENERGY_RESERVE_ATTRIBUTE_DAMAGE);
     let opp_kb_speed = ((speed_x*speed_x + speed_y*speed_y)).sqrt();
+    let opponent_pos_x = PostureModule::pos_x(opponent_boma);
+    let opponent_pos_y = PostureModule::pos_y(opponent_boma);
+    let pos_x = PostureModule::pos_x(fighter.module_accessor);
+    let pos_y = PostureModule::pos_y(fighter.module_accessor);
+    //let pos_from_you = ((pos_x - opponent_pos_x).exp2() + (pos_y - opponent_pos_y).exp2()).sqrt();
 
+    use crate::fighters::common::mechanics::cancels::attack_cancels::cancel_on_hit::MULTIHIT_CANCEL;
     AttackModule::is_attack_occur(fighter.module_accessor)
+    && ! WorkModule::is_flag(fighter.module_accessor, MULTIHIT_CANCEL)
     && ! AttackModule::is_infliction(fighter.module_accessor, *COLLISION_KIND_MASK_ALL)
     && CancelModule::is_enable_cancel(fighter.module_accessor)
     && StatusModule::situation_kind(fighter.module_accessor) == *SITUATION_KIND_AIR
     && ! WorkModule::is_flag(fighter.module_accessor, *FIGHTER_INSTANCE_WORK_ID_FLAG_DEATH_PREDICTION)
     && opp_kb_speed < 9.0
+    //&& pos_from_you < 100.0
 }
 //STATUS
 unsafe extern "C" fn status_vanish_pre(fighter: &mut L2CFighterCommon) -> L2CValue {

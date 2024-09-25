@@ -13,5 +13,5 @@ pub fn install() {
     transition_terms::install();   
     //hitbox_effect_replace::install();   
     //get_param_replace::install();   
-    //super_jump_punch::install();
+    //super_jump_punch::install();   
 }

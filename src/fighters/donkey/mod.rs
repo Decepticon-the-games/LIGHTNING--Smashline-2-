@@ -11,6 +11,6 @@ pub mod opff;
 pub fn install() {
     acmd::install();
     //status::install();
-    //opff::install();
+    opff::install();
     //params::install();
 }

@@ -7,10 +7,10 @@
 )]
 
 pub mod fighters;
-//pub mod utils;
+pub mod utils;
 
 #[skyline::main(name = "lightning")]
 pub fn main() {
     fighters::install();
-    //utils::install();
+    utils::install();
 }

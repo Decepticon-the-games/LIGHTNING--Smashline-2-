@@ -53,7 +53,12 @@ pub unsafe fn is_enable_transition_term_replace(module_accessor: &mut BattleObje
         || term == *FIGHTER_STATUS_TRANSITION_TERM_ID_CONT_APPEAL_S);
 
     if WorkModule::get_int(module_accessor, DEADFALL) != 0 {
-        return false;
+        if term == WorkModule::get_int(module_accessor, DEADFALL) {
+            return false;  
+        }
+        else {
+            return ret;
+        }
     }
     else if WorkModule::is_flag(module_accessor, CANCEL_IN_NEUTRAL) {
         if moveset_terms || other_terms {
