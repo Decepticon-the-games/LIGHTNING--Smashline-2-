@@ -29,7 +29,7 @@ pub struct LightningMeter {
     pub base_bar: u64,
     pub bars: [u64; 2],
     pub bars_background: [u64; 2],
-    pub ex_icon: u64,
+    //pub ex_icon: u64,
     pub number: u64,
 
     // Initial state
@@ -51,32 +51,18 @@ pub struct LightningMeter {
 
 impl LightningMeter {
     pub fn new(layout_data: u64) -> Self {
-        let base_bar = super::get_pane_from_layout(layout_data, "ex_meter_base\0")
-            .expect("Could not find the base EX meter!");
-
-        let bar1 = super::get_pane_from_layout(layout_data, "ex_meter_bar1\0")
-            .expect("Could not find first bar for EX meter!");
-        
-        let bar2 = super::get_pane_from_layout(layout_data, "ex_meter_bar2\0")
-            .expect("Could not find second bar for EX meter!");
-
-        let bar1_bg = super::get_pane_from_layout(layout_data, "ex_meter_bar1_bg\0")
-            .expect("Could not find first bg bar for EX meter!");
-
-        let bar2_bg = super::get_pane_from_layout(layout_data, "ex_meter_bar2_bg\0")
-            .expect("Could not find second bg bar for EX meter!");
-
-        let ex_icon = super::get_pane_from_layout(layout_data, "ex_meter_ex\0")
-            .expect("Could not find ex icon for EX meter!");
-
-        let number = super::get_pane_from_layout(layout_data, "ex_meter_number\0")
-            .expect("Could no find number for EX meter!");
+        let base_bar = get_pane_from_layout(layout_data, "ff_meter_base\0").expect("Could not find base meter!");
+        let bar1 = get_pane_from_layout(layout_data, "ff_meter_bar1\0").expect("Could not find first bar!");
+        let bar2 = get_pane_from_layout(layout_data, "ff_meter_bar2\0").expect("Could not find second bar!");
+        let bar1_bg = get_pane_from_layout(layout_data, "ff_meter_bar1_bg\0").expect("Could not find first bg bar!");
+        let bar2_bg = get_pane_from_layout(layout_data, "ff_meter_bar2_bg\0").expect("Could not find second bg bar!");
+        let number = get_pane_from_layout(layout_data, "ff_meter_num\0").expect("Could not find number!");
 
         Self {
             base_bar,
             bars: [bar1, bar2],
             bars_background: [bar1_bg, bar2_bg],
-            ex_icon,
+            //ex_icon,
             number,
 
             original_bar_width: -1.0,
@@ -94,7 +80,7 @@ impl LightningMeter {
 
     pub fn reset(&mut self) {
         set_pane_visible(self.base_bar, true);
-        set_pane_visible(self.ex_icon, false);
+        //set_pane_visible(self.ex_icon, false);
         set_pane_visible(self.bars[0], false);
         set_pane_visible(self.bars[1], false);
         set_pane_visible(self.bars_background[0], false);
@@ -114,10 +100,10 @@ impl LightningMeter {
     pub fn update_number(&mut self) {
         if self.current_number == 5 {
             set_pane_visible(self.number, false);
-            set_pane_visible(self.ex_icon, true);
+            //set_pane_visible(self.ex_icon, true);
         } else {
             set_pane_visible(self.number, true);
-            set_pane_visible(self.ex_icon, false);
+            //set_pane_visible(self.ex_icon, false);
         }
 
         let left_x = self.current_number as f32 / 5.0;
@@ -282,11 +268,11 @@ impl LightningMeter {
 
         let color = g.at(distance as f64);
 
-        set_pane_colors(
-            self.ex_icon,
-            [color.r as f32, color.g as f32, color.b as f32, color.a as f32],
-            [color.r as f32, color.g as f32, color.b as f32, color.a as f32],
-        );
+        //set_pane_colors(
+        //    self.ex_icon,
+        //    [color.r as f32, color.g as f32, color.b as f32, color.a as f32],
+        //    [color.r as f32, color.g as f32, color.b as f32, color.a as f32],
+        //);
 
         set_pane_colors(
             self.bars[0],
@@ -318,7 +304,7 @@ impl UiObject for LightningMeter {
 
     fn is_valid(&self) -> bool {
         is_pane_valid(self.base_bar)
-            && is_pane_valid(self.ex_icon)
+            //&& is_pane_valid(self.ex_icon)
             && is_pane_valid(self.number)
     }
 
@@ -327,7 +313,7 @@ impl UiObject for LightningMeter {
             self.reset();
         } else if !enable {
             set_pane_visible(self.base_bar, false);
-            set_pane_visible(self.ex_icon, false);
+            //set_pane_visible(self.ex_icon, false);
             set_pane_visible(self.number, false);
             set_pane_visible(self.bars[0], false);
             set_pane_visible(self.bars[1], false);
