@@ -1,4 +1,5 @@
-#![allow(improper_ctypes, unused_parens, unused_variables, unused_unsafe)]
+#[macro_use]
+//extern crate lazy_static;
 
 pub mod ui;
 
