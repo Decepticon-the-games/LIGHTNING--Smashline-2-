@@ -90,7 +90,7 @@ unsafe extern "C" fn cross_cancel_start_end(fighter : &mut L2CFighterCommon) -> 
 }
 unsafe extern "C" fn cross_cancel_start_main(fighter : &mut L2CFighterCommon) -> L2CValue {
 
-    MotionModule::change_motion(fighter.module_accessor, Hash40::new("wait_1"), 0.0, 1.0, false, 0.0, false, false);
+    //MotionModule::change_motion(fighter.module_accessor, Hash40::new("wait_1"), 0.0, 1.0, false, 0.0, false, false);
 
     fighter.sub_shift_status_main(L2CValue::Ptr(cross_cancel_start_main_status_loop as *const () as _))
 }

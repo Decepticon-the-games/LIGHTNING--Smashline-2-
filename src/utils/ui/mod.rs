@@ -1,7 +1,7 @@
+#[allow(non_snake_case)]
+
 use once_cell::sync::Lazy;
 use parking_lot::RwLock;
-
-use crate::dynamics::util; 
 
 use self::lightning_meter::LightningMeter;
 mod lightning_meter;
@@ -52,17 +52,14 @@ impl UiManager {
     #[export_name = "UiManager__set_lightning_meter_enable"]
     pub extern "C" fn set_lightning_meter_enable(entry_id: u32, enable: bool) {
         let mut manager = UI_MANAGER.write();
-        unsafe {
-            manager.lightning_meter[Self::get_ui_index_from_entry_id(entry_id) as usize].set_enable(enable);
-        }
+        manager.lightning_meter[Self::get_ui_index_from_entry_id(entry_id) as usize].set_enable(enable);
+    
     }
 
     #[export_name = "UiManager__set_lightning_meter_info"]
     pub extern "C" fn set_lightning_meter_info(entry_id: u32, current: f32, max: f32, per_level: f32) {
         let mut manager = UI_MANAGER.write();
-        unsafe {
-            manager.lightning_meter[Self::get_ui_index_from_entry_id(entry_id) as usize].set_meter_info(current, max, per_level);
-        }
+        manager.lightning_meter[Self::get_ui_index_from_entry_id(entry_id) as usize].set_meter_info(current, max, per_level);
     }
 }
 
@@ -167,7 +164,7 @@ unsafe fn get_set_info_alpha(ctx: &skyline::hooks::InlineCtx) {
     let ui2d_pane = *(layout_pane as *const u64);
 
     let name_ptr = (ui2d_pane as *const u8).add(0xb0);
-    let mut len = skyline::libc::strlen(name_ptr);
+    let len = skyline::libc::strlen(name_ptr);
 
     let name = std::str::from_utf8_unchecked(std::slice::from_raw_parts(name_ptr, len));
     let index = match name {

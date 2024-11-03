@@ -87,19 +87,16 @@ pub unsafe extern "C" fn status_end_escape_air(fighter: &mut L2CFighterCommon) -
     let status_kind = StatusModule::status_kind(fighter.module_accessor);
     if status_kind == FIGHTER_STATUS_KIND_FALL || status_kind == FIGHTER_STATUS_KIND_LANDING {
         if WorkModule::is_flag(fighter.module_accessor, *FIGHTER_STATUS_ESCAPE_AIR_FLAG_SLIDE) {
-            let landing_frame = WorkModule::get_param_float(fighter.module_accessor, hash40("param_motion"), hash40("landing_frame_escape_air_slide_max"));
+            let landing_frame = 10.0;//WorkModule::get_param_float(fighter.module_accessor, hash40("param_motion"), hash40("landing_frame_escape_air_slide_max"));
             WorkModule::set_float(fighter.module_accessor, landing_frame, *FIGHTER_INSTANCE_WORK_ID_FLOAT_LANDING_FRAME);
-            //let global_speed_mul = ParamModule::get_float(fighter.object(), ParamType::Common, "wavedash_speed_mul");
-            //let global_speed_mul = 1.0;
-            let speed_mul = WorkModule::get_param_float(fighter.module_accessor, hash40("param_motion"), hash40("landing_speed_mul_escape_air_slide"));
-            //let escape_air_slide_speed_clamp = WorkModule::get_param_float(fighter.module_accessor, hash40("escape_air_slide_speed"), 0) * global_speed_mul;
-            let escape_air_slide_speed_clamp = 8.0;
+
+            let speed_mul = 1.0; //WorkModule::get_param_float(fighter.module_accessor, hash40("param_motion"), hash40("landing_speed_mul_escape_air_slide"));
             fighter.clear_lua_stack();
             lua_args!(fighter, FIGHTER_KINETIC_ENERGY_ID_STOP);
-            let speed_x = (smash::app::sv_kinetic_energy::get_speed_x(fighter.lua_state_agent) * speed_mul).clamp(-escape_air_slide_speed_clamp, escape_air_slide_speed_clamp);
+            let speed_x = (smash::app::sv_kinetic_energy::get_speed_x(fighter.lua_state_agent) * speed_mul);
             fighter.clear_lua_stack();
             lua_args!(fighter, FIGHTER_KINETIC_ENERGY_ID_STOP);
-            let speed_y = (smash::app::sv_kinetic_energy::get_speed_y(fighter.lua_state_agent) * speed_mul).clamp(-escape_air_slide_speed_clamp, escape_air_slide_speed_clamp);
+            let speed_y = (smash::app::sv_kinetic_energy::get_speed_y(fighter.lua_state_agent) * speed_mul);
             fighter.clear_lua_stack();
             lua_args!(fighter, FIGHTER_KINETIC_ENERGY_ID_STOP, speed_x, speed_y);
             smash::app::sv_kinetic_energy::set_speed(fighter.lua_state_agent);
@@ -255,7 +252,7 @@ pub fn install() {
 
     Agent::new("fighter")
     .status(Pre, *FIGHTER_STATUS_KIND_ESCAPE_AIR, status_pre_escape_air)
-    .status(Main, *FIGHTER_STATUS_KIND_ESCAPE_AIR, status_escape_air)
-    .status(End, *FIGHTER_STATUS_KIND_ESCAPE_AIR, status_end_escape_air)
+    .status(Main, *FIGHTER_STATUS_KIND_ESCAPE_AIR_SLIDE, status_escape_air)
+    .status(End, *FIGHTER_STATUS_KIND_ESCAPE_AIR_SLIDE, status_end_escape_air)
     .install();
 }

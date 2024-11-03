@@ -1,4 +1,3 @@
-use crate::utils::ui::UiManager;
 use super::*;
 use skyline::nn::ro::LookupSymbol;
 use smash::app::{self, lua_bind::{FighterManager, FighterInformation, *}, sv_animcmd::*, *};

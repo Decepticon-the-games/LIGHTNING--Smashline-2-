@@ -1,9 +1,8 @@
 use super::*;
 
 pub static mut CAN_VANISH : [bool; 8] = [false; 8];//Incorporating the ability to use vanish under condition. See lightning_01_motioncancels/mod.rs
-
-pub static mut VANISH_COUNTER : [bool; 8] = [false; 8];
-pub static mut VANISH_COUNT : [i32; 8] = [0; 8];//See motioncancels/mod.rs
+//pub static mut VANISH_COUNT : [i32; 8] = [0; 8];//See motioncancels/mod.rs
+pub const VANISH_COUNT: i32 = 0x010B;
 
 //everything to do with opponent information
 pub static mut VA_OPPONENT_X : [f32; 8] = [0.0; 8];
@@ -48,7 +47,7 @@ unsafe extern "C" fn vanish_opff(fighter : &mut L2CFighterCommon) {
             //println!("va_x: {}", VA_OPPONENT_X[entry_id]);
             //println!("va_y: {}", VA_OPPONENT_Y[entry_id]);
             //
-            //println!("pos_from_you: {}", pos_from_you );
+            println!("va_count: {}", WorkModule::get_int(fighter.module_accessor, VANISH_COUNT));
         }  
               
         if vanish_condition(fighter) {
@@ -62,11 +61,22 @@ unsafe extern "C" fn vanish_opff(fighter : &mut L2CFighterCommon) {
                 StatusModule::change_status_request_from_script(fighter.module_accessor, FIGHTER_STATUS_KIND_VANISH, false);
             }
         }
-        /*if (cat1 & *FIGHTER_PAD_CMD_CAT1_FLAG_CATCH) != 0 {
-            ControlModule::set_back_command(fighter.module_accessor, FIGHTER_PAD_CMD_CAT1_FLAG_VANISH);
-        }*/
+        //Reset count on ground
+        if StatusModule::situation_kind(fighter.module_accessor) == *SITUATION_KIND_GROUND {
+            WorkModule::set_int(fighter.module_accessor, 0, VANISH_COUNT);
+        }
     }
 }
+unsafe extern "C" fn vanish_count_max(fighter : &mut L2CFighterCommon) -> bool { 
+    let entry_id = WorkModule::get_int(fighter.module_accessor, *FIGHTER_INSTANCE_WORK_ID_INT_ENTRY_ID) as usize;
+    //let fighter_kind = smash::app::utility::get_kind(&mut *fighter.module_accessor);
+    let max_jumps = WorkModule::get_int(fighter.module_accessor, *FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT_MAX);
+    let edge_one_wing_max_jumps = WorkModule::get_int(fighter.module_accessor, *FIGHTER_EDGE_INSTANCE_WORK_ID_INT_ONE_WINGED_JUMP_COUNT_MAX);
+
+    WorkModule::get_int(fighter.module_accessor, VANISH_COUNT) < max_jumps
+    || WorkModule::get_int(fighter.module_accessor, VANISH_COUNT) < edge_one_wing_max_jumps
+}   
+
 unsafe extern "C" fn vanish_condition(fighter : &mut L2CFighterCommon) -> bool {
     let entry_id = WorkModule::get_int(fighter.module_accessor, *FIGHTER_INSTANCE_WORK_ID_INT_ENTRY_ID) as usize;
     let opponent_boma = sv_battle_object::module_accessor(VA_WHO_GOT_HIT_BOMA[entry_id]);
@@ -86,6 +96,7 @@ unsafe extern "C" fn vanish_condition(fighter : &mut L2CFighterCommon) -> bool {
     && CancelModule::is_enable_cancel(fighter.module_accessor)
     && StatusModule::situation_kind(fighter.module_accessor) == *SITUATION_KIND_AIR
     && ! WorkModule::is_flag(fighter.module_accessor, *FIGHTER_INSTANCE_WORK_ID_FLAG_DEATH_PREDICTION)
+    && vanish_count_max(fighter)
     && opp_kb_speed < 9.0
     //&& pos_from_you < 100.0
 }
@@ -96,7 +107,7 @@ unsafe extern "C" fn status_vanish_pre(fighter: &mut L2CFighterCommon) -> L2CVal
         StatusModule::init_settings(
             fighter.module_accessor,
             smash::app::SituationKind(*SITUATION_KIND_AIR),
-            *FIGHTER_KINETIC_TYPE_MOTION_FALL,
+            *FIGHTER_KINETIC_TYPE_NONE,
             *GROUND_CORRECT_KIND_AIR as u32,
             smash::app::GroundCliffCheckKind(*GROUND_CLIFF_CHECK_KIND_NONE),
             false,
@@ -129,6 +140,7 @@ unsafe extern "C" fn status_vanish_init(fighter: &mut L2CFighterCommon) -> L2CVa
     let stick_manipulation = dir_x >= 0.8 || dir_x <= -0.8 || dir_y >= 0.8 || dir_y <= -0.8;
     let opponent_boma = sv_battle_object::module_accessor(VA_WHO_GOT_HIT_BOMA[entry_id]);
 
+    WorkModule::inc_int(fighter.module_accessor, VANISH_COUNT);
     VANISH_TIMER[entry_id] = -1.0;
     enable_vanish_effects(fighter);
 
@@ -184,6 +196,12 @@ unsafe extern "C" fn status_vanish_main(fighter: &mut L2CFighterCommon) -> L2CVa
     let entry_id = WorkModule::get_int(fighter.module_accessor, *FIGHTER_INSTANCE_WORK_ID_INT_ENTRY_ID) as usize;
     let opponent_boma = sv_battle_object::module_accessor(VA_WHO_GOT_HIT_BOMA[entry_id]);
 
+    //Just so we don't have to deal with lingering hitboxes from the last animation hehe
+    MotionModule::change_motion(fighter.module_accessor, Hash40::new("fall"), 0.0, 1.0, false, 0.0, false, false);
+
+    //Incase you're too close to the ground that it resets the count
+    StatusModule::set_situation_kind(fighter.module_accessor, smash::app::SituationKind(*SITUATION_KIND_AIR), true);
+
     //Get oponent position, update every frame
     VA_OPPONENT_X[entry_id] = PostureModule::pos_x(opponent_boma);
     VA_OPPONENT_Y[entry_id] = PostureModule::pos_y(opponent_boma); 
@@ -220,6 +238,7 @@ unsafe extern "C" fn enable_vanish_effects(fighter : &mut L2CFighterCommon) {
         let zero = smash::phx::Vector3f {x:0.0,y:0.0,z:0.0};
         let rotation = smash::phx::Vector3f {x:0.0,y:0.0,z:90.0}; 
 
+        KineticModule::clear_speed_all(fighter.module_accessor);//Float
         DamageModule::set_damage_lock(fighter.module_accessor, true);
         DamageModule::set_no_reaction_no_effect(fighter.module_accessor, true); 
         HitModule::set_hit_stop_mul(fighter.module_accessor, 0.0, smash::app::HitStopMulTarget{_address: *HIT_STOP_MUL_TARGET_SELF as u8}, 0.0); 

@@ -1,7 +1,3 @@
-#![deny(deprecated)]
-#![allow(unused)]
-#![allow(non_snake_case)]
-
 use {
     smash::{
         lua2cpp::{
@@ -43,7 +39,7 @@ use crate::fighters::{
     }
 };
 
-/*
+///*
 pub mod common;
 
 pub mod mario;
@@ -141,9 +137,9 @@ pub mod trail;
 pub mod miifighter;
 pub mod miiswordsman;
 pub mod miigunner;
-*/
+//*/
 
-/*
+///*
 pub fn install() {
 
 common::install();
@@ -245,11 +241,11 @@ miiswordsman::install();
 miigunner::install();
 
 }
-*/
+//*/
 
 //teseting//
 
-pub mod common;
+//pub mod common;
 
 //pub mod mario;
 //pub mod donkey;
@@ -262,10 +258,10 @@ pub mod common;
 //pub mod pikachu;
 //pub mod luigi;
 //pub mod ness;
-pub mod captain;
+//pub mod edge;
 //pub mod purin;
 
-pub fn install(){
+/*pub fn install(){
     common::install();  
 
     //mario::install();
@@ -279,6 +275,6 @@ pub fn install(){
     //pikachu::install();
     //luigi::install();
     //ness::install();
-    captain::install();
+    edge::install();
     //purin::install();
-}
+}*/

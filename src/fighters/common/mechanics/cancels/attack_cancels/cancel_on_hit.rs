@@ -142,8 +142,8 @@ pub unsafe extern "C" fn multihit_cancel(
     
 
     if entry_id < 1 {
-        println!("en_mul_cancel: {}", WorkModule::is_flag(fighter.module_accessor, ENABLE_MULTIHIT_CANCEL));
-        println!("mul_cancel: {}", WorkModule::is_flag(fighter.module_accessor, MULTIHIT_CANCEL));
+        //println!("en_mul_cancel: {}", WorkModule::is_flag(fighter.module_accessor, ENABLE_MULTIHIT_CANCEL));
+        //println!("mul_cancel: {}", WorkModule::is_flag(fighter.module_accessor, MULTIHIT_CANCEL));
     } 
 }
 //(canceling after landing a ceertain amount of hits in a multihit move)

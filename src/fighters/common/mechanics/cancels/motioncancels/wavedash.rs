@@ -20,7 +20,7 @@ unsafe extern "C" fn wavedash_chains(fighter : &mut L2CFighterCommon) {
             else if frame <10.0 && frame >1.0 
             && (ControlModule::check_button_trigger(fighter.module_accessor, *CONTROL_PAD_BUTTON_ATTACK) || ControlModule::check_button_trigger(fighter.module_accessor, *CONTROL_PAD_BUTTON_SPECIAL))
             {
-                //CancelModule::enable_cancel(fighter.module_accessor);
+                CancelModule::enable_cancel(fighter.module_accessor);
             }
         }  
     }

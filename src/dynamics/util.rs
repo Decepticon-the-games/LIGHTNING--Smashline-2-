@@ -1,6 +1,6 @@
-use smash::app::{BattleObject, BattleObjectModuleAccessor};
-use smash::lua2cpp::L2CFighterCommon;
-use std::arch::asm;
+use smash::app::{BattleObject/*, BattleObjectModuleAccessor*/};
+//use smash::lua2cpp::L2CFighterCommon;
+//use std::arch::asm;
 
 #[macro_export]
 macro_rules! dump_trace {
