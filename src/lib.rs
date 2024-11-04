@@ -6,7 +6,7 @@
 
 pub mod fighters;
 //pub mod utils;
-//pub mod dynamics;
+pub mod dynamics;
 
 #[skyline::main(name = "lightning")]
 pub fn main() {

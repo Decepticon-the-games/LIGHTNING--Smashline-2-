@@ -39,7 +39,7 @@ use crate::fighters::{
     }
 };
 
-///*
+/*
 pub mod common;
 
 pub mod mario;
@@ -137,9 +137,9 @@ pub mod trail;
 pub mod miifighter;
 pub mod miiswordsman;
 pub mod miigunner;
-//*/
 
-///*
+
+
 pub fn install() {
 
 common::install();
@@ -241,13 +241,13 @@ miiswordsman::install();
 miigunner::install();
 
 }
-//*/
+*/
 
 //teseting//
 
-//pub mod common;
+pub mod common;
 
-//pub mod mario;
+pub mod mario;
 //pub mod donkey;
 //pub mod link;
 //pub mod samus;
@@ -261,10 +261,10 @@ miigunner::install();
 //pub mod edge;
 //pub mod purin;
 
-/*pub fn install(){
+pub fn install(){
     common::install();  
 
-    //mario::install();
+    mario::install();
     //donkey::install();
     //link::install();
     //samus::install();
@@ -275,6 +275,6 @@ miigunner::install();
     //pikachu::install();
     //luigi::install();
     //ness::install();
-    edge::install();
+    //edge::install();
     //purin::install();
-}*/
+}
